@@ -13,10 +13,30 @@
       <tr>
         <td>Job ID</td>
         <td><%= job.id %></td>
+        <td></td>
       </tr>
       <tr>
         <td>Enqueued At</td>
         <td><%= job.enqueue_time %></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Started At</td>
+        <% if started_at = job.started_at %>
+          <td><%= job.started_at %></td>
+          <% if enqueue_time = job.enqueue_time %>
+            <td><%= (started_at - enqueue_time).total_seconds %>s queue</td>
+          <% end %>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Finished At</td>
+        <% if finished_at = job.finished_at %>
+          <td><%= job.finished_at %></td>
+          <% if started_at = job.started_at %>
+            <td><%= (finished_at - started_at).total_seconds %>s runtime</td>
+          <% end %>
+        <% end %>
       </tr>
     </tbody>
   </table>

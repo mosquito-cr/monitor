@@ -43,7 +43,7 @@ class ShortLivedRunner < Mosquito::Runner
 
   def stop
     self.keep_running = false
-    super
+    super.receive
   end
 
   def current_run_length
@@ -129,7 +129,7 @@ loop do
     runner.run_forever = true
 
     Signal::INT.trap do
-      runner.stop
+      runner.keep_running = false
       Signal::INT.reset
     end
 

@@ -58,7 +58,7 @@ export default class Executor {
 
   onMessage(channel, message) {
     switch(message.event) {
-      case "starting":
+      case "job-started":
         this.busy = true
         this.job = message.job_run
         this.queue = message.from_queue

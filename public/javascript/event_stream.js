@@ -28,7 +28,7 @@ export default class EventStream {
   }
 
   routeMessage(message) {
-    console.log(message)
+    // console.log(message)
     switch (message.type) {
       case "broadcast":
         this.dispatchCallbacks("broadcast", message)
@@ -37,7 +37,7 @@ export default class EventStream {
   }
 
   onerror(e) {
-    console.log("event stream error")
+    console.error("event stream error")
     console.dir(e)
   }
 

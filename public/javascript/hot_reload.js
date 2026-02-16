@@ -68,4 +68,5 @@ class HotReloader {
 
 export const HotReload = (path) => new HotReloader(path)
 
-HotReload("ws://localhost:3000/hot-reload")
+const host = window.location.host
+HotReload(`ws://${host}/hot-reload`)

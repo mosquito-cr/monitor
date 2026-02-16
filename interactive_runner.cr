@@ -1,11 +1,5 @@
 require "mosquito"
-
-Mosquito.configure do |settings|
-  settings.redis_url = (ENV["REDIS_URL"]? || "redis://localhost:6379/2")
-  settings.run_cron_scheduler = false
-  settings.use_distributed_lock = true
-  settings.send_metrics = true
-end
+require "./init"
 
 struct InteractiveLogStreamFormatter < Log::StaticFormatter
   def run
@@ -39,7 +33,7 @@ class ShortLivedRunner < Mosquito::Runner
     run
 
     loop do
-      sleep 1
+      sleep 1.seconds
 
       break unless keep_running?
     end
@@ -68,7 +62,7 @@ end
 class LongJob < Mosquito::QueuedJob
   def perform
     log "It only takes me 3 second to do this"
-    sleep 3
+    sleep 3.seconds
   end
 end
 
@@ -77,7 +71,7 @@ class EveryThreeSecondsJob < Mosquito::PeriodicJob
 
   def perform
     log "I'm running every 3 seconds, taking 1 second"
-    sleep 1
+    sleep 1.seconds
   end
 end
 
@@ -85,7 +79,7 @@ class RandomLengthJob < Mosquito::QueuedJob
   param length : Int32 = 10
   def perform
     log "running for #{length} seconds"
-    sleep length
+    sleep length.seconds
   end
 end
 

@@ -4,4 +4,4 @@ require "mosquito"
 require "./init"
 require "./src/web_routes"
 
-Kemal.run
+Kemal.run(port: 8080)

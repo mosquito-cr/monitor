@@ -9,7 +9,8 @@ import Executor from "./executor.js"
 const overseerNest = new Nest(document.querySelector("#overseers"), Overseer)
 Overseer.setTemplate(document.querySelector("template#overseer"))
 
-const eventStream = new EventStream("ws://localhost:3000/events")
+const host = window.location.host
+const eventStream = new EventStream(`ws://${host}/events`)
 
 eventStream.on("broadcast", event => {
   const parts = event.channel.split(":")
@@ -18,7 +19,7 @@ eventStream.on("broadcast", event => {
       overseerNest.findOrHatch(parts[2]).onMessage(parts, event.message)
       break
     case "queue":
-      // dispatchQueueMessage(parts, event.message)
+      dispatchQueueMessage(parts, event.message)
       break
   }
 })

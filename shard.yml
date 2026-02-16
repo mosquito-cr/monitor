@@ -1,6 +1,14 @@
 name: mosquito_inspector
 version: 0.1.0
 
+targets:
+  interactive_runner:
+    main: interactive_runner.cr
+  web:
+    main: web_interface.cr
+  tui:
+    main: tui_interface.cr
+
 dependencies:
   mosquito:
     # github: mosquito-cr/mosquito

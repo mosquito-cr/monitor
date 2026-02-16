@@ -16,7 +16,7 @@
       <tr>
         <th scope=row><%= queue.name %></th>
         <% Mosquito::Backend::QUEUES.each do |subqueue| %>
-          <td><%= queue.size_details[subqueue] %></td>
+          <td data-queue-name="<%= queue.name %>.<%= subqueue %>"><%= queue.size_details[subqueue] %></td>
         <% end %>
       </tr>
     <% end %>

@@ -1,6 +1,7 @@
 "use strict";
 
 import EventStream from "./event_stream.js"
+import { basePath, wsBase } from "./lib/config.js"
 
 import Nest from "./nest.js"
 import Overseer from "./overseer.js"
@@ -9,8 +10,7 @@ import Executor from "./executor.js"
 const overseerNest = new Nest(document.querySelector("#overseers"), Overseer)
 Overseer.setTemplate(document.querySelector("template#overseer"))
 
-const host = window.location.host
-const eventStream = new EventStream(`ws://${host}/events`)
+const eventStream = new EventStream(`${wsBase}/events`)
 
 eventStream.on("broadcast", event => {
   const parts = event.channel.split(":")
@@ -25,7 +25,7 @@ eventStream.on("broadcast", event => {
 })
 
 async function fetchOverseers() {
-  fetch("/api/overseers")
+  fetch(`${basePath}/api/overseers`)
   .then(response => response.json())
   .then(({overseers}) => {
     overseers.forEach(overseerId => {

@@ -1,9 +1,10 @@
 "use strict";
 
 import BaseComponent from '../../lib/base-component.js'
+import { basePath } from '../../lib/config.js'
 
-const html = await BaseComponent.fetchHTML('/javascript/components/queue/queue.html')
-const css = await BaseComponent.fetchCSS('/javascript/components/queue/queue.css')
+const html = await BaseComponent.fetchHTML(`${basePath}/javascript/components/queue/queue.html`)
+const css = await BaseComponent.fetchCSS(`${basePath}/javascript/components/queue/queue.css`)
 
 export default class Queue extends BaseComponent {
   constructor () {

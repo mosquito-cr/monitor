@@ -68,5 +68,6 @@ class HotReloader {
 
 export const HotReload = (path) => new HotReloader(path)
 
-const host = window.location.host
-HotReload(`ws://${host}/hot-reload`)
+import { wsBase } from "./lib/config.js"
+
+HotReload(`${wsBase}/hot-reload`)

@@ -2,6 +2,7 @@
 
 import Executor from './executor.js'
 import Nest from './nest.js'
+import { basePath } from './lib/config.js'
 
 export default class Overseer {
   static template = null
@@ -118,7 +119,7 @@ export default class Overseer {
   }
 
   async fetchSelf() {
-    fetch(`/api/overseers/${this.id}`)
+    fetch(`${basePath}/api/overseers/${this.id}`)
     .then(response => response.json())
     .then((overseer) => {
       this.lastActiveAt = overseer.last_active_at
@@ -126,7 +127,7 @@ export default class Overseer {
   }
 
   async fetchExecutors() {
-    fetch(`/api/overseers/${this.id}/executors`)
+    fetch(`${basePath}/api/overseers/${this.id}/executors`)
     .then(response => response.json())
     .then(({executors}) => {
       executors.forEach(executor => {

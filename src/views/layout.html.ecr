@@ -2,12 +2,13 @@
 <html>
 <head>
   <title>Mosquito</title>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/app.css">
-  <script type="module" src="/javascript/app.js"></script>
+  <meta name="mosquito-base-path" content="<%= Current.base_path %>">
+  <link rel="stylesheet" type="text/css" href="<%= Current.base_path %>/stylesheets/app.css">
+  <script type="module" src="<%= Current.base_path %>/javascript/app.js"></script>
 
   <%= yield_content "header" %>
   <% if Kemal.config.env == "development" %>
-    <script type="module" src="/javascript/hot_reload.js"></script>
+    <script type="module" src="<%= Current.base_path %>/javascript/hot_reload.js"></script>
   <% end %>
 </head>
 <body>
@@ -22,9 +23,9 @@
   <h1>Mosquito Dashboard (<%= Current.tab %>)</h1>
 
   <div id="tabs">
-    <a href="/queues"  class="current-tab-<%= Current.tab == :queues %>">Queues</a>
-    <a href="/overseers" class="current-tab-<%= Current.tab == :overseers %>">Overseers</a>
-    <a href="/messages"  class="current-tab-<%= Current.tab == :messages %>">Messages</a>
+    <a href="<%= Current.base_path %>/queues"  class="current-tab-<%= Current.tab == :queues %>">Queues</a>
+    <a href="<%= Current.base_path %>/overseers" class="current-tab-<%= Current.tab == :overseers %>">Overseers</a>
+    <a href="<%= Current.base_path %>/messages"  class="current-tab-<%= Current.tab == :messages %>">Messages</a>
     <%= yield_content "extra_tabs" %>
   </div>
 

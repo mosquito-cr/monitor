@@ -2,9 +2,10 @@
 
 import BaseComponent from '../../lib/base-component.js'
 import Builder from "../../lib/builder.js"
+import { basePath } from '../../lib/config.js'
 
-const html = await BaseComponent.fetchHTML('/javascript/components/overseer-list/overseer-list.html')
-const css = await BaseComponent.fetchCSS('/javascript/components/overseer-list/overseer-list.css')
+const html = await BaseComponent.fetchHTML(`${basePath}/javascript/components/overseer-list/overseer-list.html`)
+const css = await BaseComponent.fetchCSS(`${basePath}/javascript/components/overseer-list/overseer-list.css`)
 
 export default class OverseerList extends BaseComponent {
   constructor () {

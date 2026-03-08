@@ -1,9 +1,10 @@
 "use strict";
 
 import BaseComponent from '../../lib/base-component.js'
+import { basePath } from '../../lib/config.js'
 
-const html = await BaseComponent.fetchHTML('/javascript/components/message-stream/message-stream.html')
-const css = await BaseComponent.fetchCSS('/javascript/components/message-stream/message-stream.css')
+const html = await BaseComponent.fetchHTML(`${basePath}/javascript/components/message-stream/message-stream.html`)
+const css = await BaseComponent.fetchCSS(`${basePath}/javascript/components/message-stream/message-stream.css`)
 
 export default class MessageStream extends BaseComponent {
   constructor () {

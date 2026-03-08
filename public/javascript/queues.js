@@ -1,6 +1,7 @@
 import EventStream from "./event_stream.js"
-const host = window.location.host
-const eventStream = new EventStream(`ws://${host}/events`)
+import { wsBase } from "./lib/config.js"
+
+const eventStream = new EventStream(`${wsBase}/events`)
 
 eventStream.on("broadcast", message => {
   const parts = message.channel.split(":")

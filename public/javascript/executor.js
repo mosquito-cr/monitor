@@ -85,7 +85,8 @@ export default class Executor {
     if (this.job) {
       const template = Executor.linkTemplate()
       template.querySelector("a").textContent = this.job
-      template.querySelector("a").href = `/job_run/${this.job}`
+      const basePath = window.MOSQUITO_BASE_PATH || ""
+      template.querySelector("a").href = `${basePath}/job_run/${this.job}`
       this.detailsRow.querySelector(".working-on").textContent = ""
       this.detailsRow.querySelector(".working-on").appendChild(template)
     } else   {

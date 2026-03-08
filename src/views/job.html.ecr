@@ -3,7 +3,7 @@
 <% end %>
 
 <% content_for "header" do %>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/job.css" />
+  <link rel="stylesheet" type="text/css" href="<%= Current.base_path %>/stylesheets/job.css" />
 <% end %>
 
 <% if job.found? %>

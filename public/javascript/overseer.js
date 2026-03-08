@@ -118,7 +118,8 @@ export default class Overseer {
   }
 
   async fetchSelf() {
-    fetch(`/api/overseers/${this.id}`)
+    const basePath = window.MOSQUITO_BASE_PATH || ""
+    fetch(`${basePath}/api/overseers/${this.id}`)
     .then(response => response.json())
     .then((overseer) => {
       this.lastActiveAt = overseer.last_active_at
@@ -126,7 +127,8 @@ export default class Overseer {
   }
 
   async fetchExecutors() {
-    fetch(`/api/overseers/${this.id}/executors`)
+    const basePath = window.MOSQUITO_BASE_PATH || ""
+    fetch(`${basePath}/api/overseers/${this.id}/executors`)
     .then(response => response.json())
     .then(({executors}) => {
       executors.forEach(executor => {

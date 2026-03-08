@@ -2,8 +2,9 @@
 
 import BaseComponent from '../../lib/base-component.js'
 
-const html = await BaseComponent.fetchHTML('/javascript/components/queue/queue.html')
-const css = await BaseComponent.fetchCSS('/javascript/components/queue/queue.css')
+const basePath = window.MOSQUITO_BASE_PATH || ""
+const html = await BaseComponent.fetchHTML(`${basePath}/javascript/components/queue/queue.html`)
+const css = await BaseComponent.fetchCSS(`${basePath}/javascript/components/queue/queue.css`)
 
 export default class Queue extends BaseComponent {
   constructor () {

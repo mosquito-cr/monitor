@@ -2,8 +2,9 @@
 
 import BaseComponent from '../../lib/base-component.js'
 
-const html = await BaseComponent.fetchHTML('/javascript/components/message-stream/message-stream.html')
-const css = await BaseComponent.fetchCSS('/javascript/components/message-stream/message-stream.css')
+const basePath = window.MOSQUITO_BASE_PATH || ""
+const html = await BaseComponent.fetchHTML(`${basePath}/javascript/components/message-stream/message-stream.html`)
+const css = await BaseComponent.fetchCSS(`${basePath}/javascript/components/message-stream/message-stream.css`)
 
 export default class MessageStream extends BaseComponent {
   constructor () {

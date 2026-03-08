@@ -1,8 +1,7 @@
 import EventStream from "./event_stream.js"
-const basePath = window.MOSQUITO_BASE_PATH || ""
-const host = window.location.host
-const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:"
-const eventStream = new EventStream(`${wsProtocol}//${host}${basePath}/events`)
+import { wsBase } from "./lib/config.js"
+
+const eventStream = new EventStream(`${wsBase}/events`)
 
 eventStream.on("broadcast", message => {
   const parts = message.channel.split(":")

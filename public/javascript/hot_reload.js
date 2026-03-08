@@ -68,7 +68,6 @@ class HotReloader {
 
 export const HotReload = (path) => new HotReloader(path)
 
-const basePath = window.MOSQUITO_BASE_PATH || ""
-const host = window.location.host
-const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:"
-HotReload(`${wsProtocol}//${host}${basePath}/hot-reload`)
+import { wsBase } from "./lib/config.js"
+
+HotReload(`${wsBase}/hot-reload`)

@@ -2,6 +2,7 @@
 
 import Executor from './executor.js'
 import Nest from './nest.js'
+import { basePath } from './lib/config.js'
 
 export default class Overseer {
   static template = null
@@ -118,7 +119,6 @@ export default class Overseer {
   }
 
   async fetchSelf() {
-    const basePath = window.MOSQUITO_BASE_PATH || ""
     fetch(`${basePath}/api/overseers/${this.id}`)
     .then(response => response.json())
     .then((overseer) => {
@@ -127,7 +127,6 @@ export default class Overseer {
   }
 
   async fetchExecutors() {
-    const basePath = window.MOSQUITO_BASE_PATH || ""
     fetch(`${basePath}/api/overseers/${this.id}/executors`)
     .then(response => response.json())
     .then(({executors}) => {

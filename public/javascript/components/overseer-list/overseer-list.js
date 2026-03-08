@@ -2,8 +2,8 @@
 
 import BaseComponent from '../../lib/base-component.js'
 import Builder from "../../lib/builder.js"
+import { basePath } from '../../lib/config.js'
 
-const basePath = window.MOSQUITO_BASE_PATH || ""
 const html = await BaseComponent.fetchHTML(`${basePath}/javascript/components/overseer-list/overseer-list.html`)
 const css = await BaseComponent.fetchCSS(`${basePath}/javascript/components/overseer-list/overseer-list.css`)
 

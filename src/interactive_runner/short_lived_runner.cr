@@ -20,7 +20,7 @@ class ShortLivedRunner < Mosquito::Runner
 
   def stop
     self.keep_running = false
-    super.receive
+    super.wait
   end
 
   def current_run_length

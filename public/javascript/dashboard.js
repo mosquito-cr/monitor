@@ -16,7 +16,7 @@ eventStream.on("broadcast", event => {
   const parts = event.channel.split(":")
   switch (parts[1]) {
     case "overseer":
-      overseerNest.findOrHatch(parts[2]).onMessage(parts, event.message)
+      hatchOverseer(parts[2]).onMessage(parts, event.message)
       break
     case "queue":
       dispatchQueueMessage(parts, event.message)
@@ -24,18 +24,33 @@ eventStream.on("broadcast", event => {
   }
 })
 
+const overseerRefreshInterval = 10000 // ms
+
+function hatchOverseer(overseerId) {
+  const overseer = overseerNest.findOrHatch(overseerId)
+  overseer.onRemove ||= () => overseerNest.findAndRemove(overseerId)
+  return overseer
+}
+
+// The server only lists overseers seen within dead_overseer_threshold.
+// Add new ones, and grey out (then remove) ones that dropped off the list.
 async function fetchOverseers() {
-  fetch("/api/overseers")
+  return fetch("/api/overseers")
   .then(response => response.json())
   .then(({overseers}) => {
-    overseers.forEach(overseerId => {
-      overseerNest.findOrHatch(overseerId)
+    const active = new Set(overseers)
+
+    overseers.forEach(overseerId => hatchOverseer(overseerId).setAlive(true))
+
+    Object.entries(overseerNest.hatchlings).forEach(([overseerId, overseer]) => {
+      if (!active.has(overseerId)) overseer.markDead()
     })
   }).catch(error => console.error(error))
 }
 
 function go() {
   fetchOverseers()
+  setInterval(fetchOverseers, overseerRefreshInterval)
 }
 
 if (document.readyState === "loading")

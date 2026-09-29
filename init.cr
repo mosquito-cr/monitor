@@ -8,7 +8,7 @@
 
 Mosquito.configure do |settings|
   settings.idle_wait = 10.seconds
-  settings.redis_url = "redis://localhost:6379/2"
+  settings.backend_connection_string = ENV["REDIS_URL"]? || "redis://localhost:6379/2"
   settings.publish_metrics = true
 end
 

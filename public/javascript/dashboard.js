@@ -16,7 +16,7 @@ eventStream.on("broadcast", event => {
   const parts = event.channel.split(":")
   switch (parts[1]) {
     case "overseer":
-      overseerNest.findOrHatch(parts[2]).onMessage(parts, event.message)
+      hatchOverseer(parts[2]).onMessage(parts, event.message)
       break
     case "queue":
       dispatchQueueMessage(parts, event.message)
@@ -24,14 +24,19 @@ eventStream.on("broadcast", event => {
   }
 })
 
+function hatchOverseer(overseerId) {
+  const overseer = overseerNest.findOrHatch(overseerId)
+  overseer.onRemove ||= () => overseerNest.findAndRemove(overseerId)
+  return overseer
+}
+
+// Loads the overseers alive at page load. After that, new overseers arrive
+// over the websocket, and each overseer polls its own status while quiet.
 async function fetchOverseers() {
-  fetch("/api/overseers")
+  return fetch("/api/overseers")
   .then(response => response.json())
-  .then(({overseers}) => {
-    overseers.forEach(overseerId => {
-      overseerNest.findOrHatch(overseerId)
-    })
-  }).catch(error => console.error(error))
+  .then(({overseers}) => overseers.forEach(hatchOverseer))
+  .catch(error => console.error(error))
 }
 
 function go() {

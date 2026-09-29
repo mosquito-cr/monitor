@@ -1,6 +1,37 @@
 .overseer {
   display: block;
   width: 100%;
+  transition: opacity 1s;
+}
+
+#overseers {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Offline overseers sort below live ones without reordering the DOM. */
+.overseer.inactive {
+  order: 1;
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.overseer-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+  color: #707070;
+}
+
+.overseer-full-id {
+  user-select: all;
+  cursor: copy;
+}
+
+.overseer-full-id.copied::after {
+  content: " copied";
+  font-family: sans-serif;
 }
 
 .overseer.inactive .missing {

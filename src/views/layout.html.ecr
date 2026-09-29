@@ -6,9 +6,9 @@
   <script type="module" src="/javascript/app.js"></script>
 
   <%= yield_content "header" %>
-  <% if Kemal.config.env == "development" %>
+  <% {% if flag?(:hot_reload) %} %>
     <script type="module" src="/javascript/hot_reload.js"></script>
-  <% end %>
+  <% {% end %} %>
 </head>
 <body>
   <!--div id="queues" class="active">

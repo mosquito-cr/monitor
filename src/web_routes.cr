@@ -16,7 +16,12 @@ require "./http/overseers"
 require "./http/queues"
 require "./http/events"
 require "./http/job_run"
-require "./http/hot_reload"
+
+# Hot reload needs libfswatch, so it is only compiled in with -Dhot_reload.
+{% if flag?(:hot_reload) %}
+  require "./http/hot_reload"
+{% end %}
+
 require "./api/executors"
 require "./api/overseers"
 

@@ -11,7 +11,10 @@ export default class Overseer {
   }
 
   onMessage(channel, message) {
-    this.lastMessageReceivedAt = (new Date()).getTime()
+    // Any message proves the overseer is alive, so there is no need to poll.
+    this.lastActiveAt = Date.now()
+    if (this.alive !== true) this.setAlive(true)
+    this.resetPoll()
 
     // overseer message
     if (channel.length == 3) {
@@ -41,6 +44,9 @@ export default class Overseer {
       case "stopping-coordinating":
         this.setCoordinatingFlag(false)
         break
+      case "exited":
+        this.markDead()
+        break
       case "executor-died":
         // { event: "executor-died", executor: "b795db84445aae99" }
         const executor = this.executorNest.findAndRemove(message.executor)
@@ -52,15 +58,58 @@ export default class Overseer {
     }
   }
 
+  static quietAfter = 5000 // ms of silence before polling for status
+  static maxPollInterval = 60000 // ms; quiet polls back off geometrically to this
+  static removeDeadAfter = 30000 // ms an offline overseer stays greyed out
+
   constructor(overseerId) {
     this.id = overseerId
     this.element = null
     this.updateTimeout = null
-    this.lastActiveAt = null
-    this.fetchExecutors()
-    this.lastMessageReceivedAt = (new Date()).getTime()
+    this.removeTimeout = null
+    this.onRemove = null
 
-    this.updateSelfTicker = setInterval(this.fetchSelfIfIdle.bind(this), 2000)
+    // Websocket messages keep an overseer alive. An idle or killed overseer
+    // publishes nothing, so once it goes quiet, poll the server's view of
+    // its heartbeat, doubling the delay after each quiet poll.
+    this.alive = null
+    this.lastActiveAt = null   // ms, adjusted to the browser clock
+    this.pollTimeout = null
+    this.pollDelay = Overseer.quietAfter
+    this.deadThresholdMs = null
+
+    this.fetchExecutors()
+    this.fetchSelf()
+    this.schedulePoll()
+    this.lastSeenTicker = setInterval(this.updateLastSeen.bind(this), 1000)
+  }
+
+  resetPoll() {
+    this.pollDelay = Overseer.quietAfter
+    this.schedulePoll()
+  }
+
+  // Polls after pollDelay, or just after the overseer would cross the dead
+  // threshold if that comes sooner, so a killed overseer is caught on time.
+  schedulePoll() {
+    clearTimeout(this.pollTimeout)
+
+    let delay = this.pollDelay
+    if (this.lastActiveAt != null && this.deadThresholdMs != null) {
+      const untilDead = this.lastActiveAt + this.deadThresholdMs - Date.now() + 1000
+      delay = Math.max(1000, Math.min(delay, untilDead))
+    }
+
+    this.pollTimeout = setTimeout(this.pollWhileQuiet.bind(this), delay)
+  }
+
+  pollWhileQuiet() {
+    this.fetchSelf().finally(() => {
+      // A dead overseer stays quiet; a websocket message resumes polling.
+      if (this.alive === false) return
+      this.pollDelay = Math.min(this.pollDelay * 2, Overseer.maxPollInterval)
+      this.schedulePoll()
+    })
   }
 
   appendTo(element) {
@@ -70,7 +119,66 @@ export default class Overseer {
 
     this.element = element.querySelector(`.overseer[data-id="${this.id}"]`)
     this.executorNest = new Nest(this.element.querySelector(".executors tbody"), Executor)
+
+    const shortId = this.element.querySelector('.overseer-id')
+    shortId.textContent = `<${this.id.slice(-6)}>`
+    shortId.title = this.id
+
+    const fullId = this.element.querySelector('.overseer-full-id')
+    fullId.textContent = this.id
+    fullId.addEventListener('click', this.copyId.bind(this))
+
     this.updateSummary()
+  }
+
+  copyId(event) {
+    const target = event.currentTarget
+    navigator.clipboard?.writeText(this.id).then(() => {
+      target.classList.add('copied')
+      setTimeout(() => target.classList.remove('copied'), 1500)
+    }).catch(error => console.error(error))
+  }
+
+  // Called when the overseer is no longer in the active list or its status
+  // reports it dead. Greys it out, then removes it after a grace period.
+  markDead() {
+    this.setAlive(false)
+    if (this.removeTimeout) return
+    this.removeTimeout = setTimeout(this.remove.bind(this), Overseer.removeDeadAfter)
+  }
+
+  setAlive(alive) {
+    this.alive = alive
+    if (alive && this.removeTimeout) {
+      clearTimeout(this.removeTimeout)
+      this.removeTimeout = null
+    }
+    this.updateSummary()
+  }
+
+  remove() {
+    clearTimeout(this.pollTimeout)
+    clearInterval(this.lastSeenTicker)
+    clearTimeout(this.updateTimeout)
+    clearTimeout(this.removeTimeout)
+    this.element?.remove()
+    if (this.onRemove) this.onRemove(this)
+  }
+
+  updateLastSeen() {
+    if (!this.element) return
+    const lastActive = this.element.querySelector('.last-active-at')
+
+    if (this.lastActiveAt == null) {
+      lastActive.textContent = this.alive === false ? 'never seen' : ''
+      lastActive.classList.toggle('hidden', this.alive !== false)
+      return
+    }
+
+    const seconds = Math.max(0, Math.round((Date.now() - this.lastActiveAt) / 1000))
+    lastActive.textContent = `last seen ${formatAge(seconds)} ago`
+    lastActive.title = new Date(this.lastActiveAt).toISOString()
+    lastActive.classList.remove('hidden')
   }
 
   updateSummary() {
@@ -87,10 +195,11 @@ export default class Overseer {
     if (summary.classList.contains('hidden'))
       summary.classList.remove('hidden')
 
-    // const isInactive = this.lastActiveAt < (new Date()).getTime() - 5000
-    // this.element.classList.toggle('inactive', isInactive)
+    const isInactive = this.alive === false
+    this.element.classList.toggle('inactive', isInactive)
+    this.element.querySelector('.missing').classList.toggle('hidden', !isInactive)
 
-    this.element.querySelector('.overseer-id').textContent = `<${this.id.slice(-6)}>`
+    this.updateLastSeen()
   }
 
   executorMessage(executorId, message) {
@@ -109,19 +218,24 @@ export default class Overseer {
     }
   }
 
-  fetchSelfIfIdle() {
-    let now = (new Date()).getTime()
-    if (this.lastMessageReceivedAt < now - 5000) {
-      this.fetchSelf().then(this.updateSummary.bind(this))
-      this.lastMessageReceivedAt = now
-    }
-  }
-
   async fetchSelf() {
-    fetch(`/api/overseers/${this.id}`)
+    return fetch(`/api/overseers/${encodeURIComponent(this.id)}`)
     .then(response => response.json())
     .then((overseer) => {
-      this.lastActiveAt = overseer.last_active_at
+      this.deadThresholdMs = overseer.dead_threshold_seconds * 1000
+
+      if (overseer.last_active_at) {
+        // Measure age against the server clock so browser clock skew
+        // doesn't make a live overseer look stale.
+        // Never move backwards past a websocket message seen since.
+        const age = Date.parse(overseer.server_time) - Date.parse(overseer.last_active_at)
+        this.lastActiveAt = Math.max(this.lastActiveAt ?? 0, Date.now() - age)
+      }
+
+      if (overseer.alive)
+        this.setAlive(true)
+      else
+        this.markDead()
     }).catch(error => console.error(error))
   }
 
@@ -143,4 +257,12 @@ export default class Overseer {
       this.updateSummary()
     }).catch(error => console.error(error))
   }
+}
+
+function formatAge(seconds) {
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ${seconds % 60}s`
+  const hours = Math.floor(minutes / 60)
+  return `${hours}h ${minutes % 60}m`
 }

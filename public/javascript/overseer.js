@@ -76,6 +76,7 @@ export default class Overseer {
     this.lastActiveAt = null   // ms, adjusted to the browser clock
     this.pollTimeout = null
     this.pollDelay = Overseer.quietAfter
+    this.deadThresholdMs = null
 
     this.fetchExecutors()
     this.fetchSelf()
@@ -88,13 +89,24 @@ export default class Overseer {
     this.schedulePoll()
   }
 
+  // Polls after pollDelay, or just after the overseer would cross the dead
+  // threshold if that comes sooner, so a killed overseer is caught on time.
   schedulePoll() {
     clearTimeout(this.pollTimeout)
-    this.pollTimeout = setTimeout(this.pollWhileQuiet.bind(this), this.pollDelay)
+
+    let delay = this.pollDelay
+    if (this.lastActiveAt != null && this.deadThresholdMs != null) {
+      const untilDead = this.lastActiveAt + this.deadThresholdMs - Date.now() + 1000
+      delay = Math.max(1000, Math.min(delay, untilDead))
+    }
+
+    this.pollTimeout = setTimeout(this.pollWhileQuiet.bind(this), delay)
   }
 
   pollWhileQuiet() {
     this.fetchSelf().finally(() => {
+      // A dead overseer stays quiet; a websocket message resumes polling.
+      if (this.alive === false) return
       this.pollDelay = Math.min(this.pollDelay * 2, Overseer.maxPollInterval)
       this.schedulePoll()
     })
@@ -210,6 +222,8 @@ export default class Overseer {
     return fetch(`/api/overseers/${encodeURIComponent(this.id)}`)
     .then(response => response.json())
     .then((overseer) => {
+      this.deadThresholdMs = overseer.dead_threshold_seconds * 1000
+
       if (overseer.last_active_at) {
         // Measure age against the server clock so browser clock skew
         // doesn't make a live overseer look stale.

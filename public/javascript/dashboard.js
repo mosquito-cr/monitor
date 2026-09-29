@@ -24,33 +24,23 @@ eventStream.on("broadcast", event => {
   }
 })
 
-const overseerRefreshInterval = 10000 // ms
-
 function hatchOverseer(overseerId) {
   const overseer = overseerNest.findOrHatch(overseerId)
   overseer.onRemove ||= () => overseerNest.findAndRemove(overseerId)
   return overseer
 }
 
-// The server only lists overseers seen within dead_overseer_threshold.
-// Add new ones, and grey out (then remove) ones that dropped off the list.
+// Loads the overseers alive at page load. After that, new overseers arrive
+// over the websocket, and each overseer polls its own status while quiet.
 async function fetchOverseers() {
   return fetch("/api/overseers")
   .then(response => response.json())
-  .then(({overseers}) => {
-    const active = new Set(overseers)
-
-    overseers.forEach(overseerId => hatchOverseer(overseerId).setAlive(true))
-
-    Object.entries(overseerNest.hatchlings).forEach(([overseerId, overseer]) => {
-      if (!active.has(overseerId)) overseer.markDead()
-    })
-  }).catch(error => console.error(error))
+  .then(({overseers}) => overseers.forEach(hatchOverseer))
+  .catch(error => console.error(error))
 }
 
 function go() {
   fetchOverseers()
-  setInterval(fetchOverseers, overseerRefreshInterval)
 }
 
 if (document.readyState === "loading")

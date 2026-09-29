@@ -4,7 +4,14 @@
   transition: opacity 1s;
 }
 
+#overseers {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Offline overseers sort below live ones without reordering the DOM. */
 .overseer.inactive {
+  order: 1;
   opacity: 0.4;
   filter: grayscale(1);
 }

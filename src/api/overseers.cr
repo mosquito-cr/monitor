@@ -35,12 +35,12 @@ module Mosquito::InspectWeb::OverseerStatus
   end
 end
 
-# Lists overseers seen within `dead_overseer_threshold`. Pass `?all=1` to
+# Lists overseers seen within `dead_overseer_threshold`. Pass `?all=true` to
 # include every overseer in the core registry (up to a day old).
 get "/api/overseers" do |env|
   env.response.content_type = "application/json"
 
-  ids = if env.params.query["all"]? == "1"
+  ids = if env.params.query["all"]? == "true"
           Mosquito.backend.list_overseers
         else
           since = Time.utc - Mosquito::InspectWeb::OverseerStatus.threshold

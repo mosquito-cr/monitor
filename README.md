@@ -46,3 +46,11 @@ A utility script is provided to enqueue and execute some jobs, which is
 convenient for working on the visualizer. Use `crystal run interactive_runner.cr`
 to run it.
 
+
+The web interface can reload the browser when files change. This needs
+[libfswatch](https://github.com/emcrisostomo/fswatch) and is only compiled in
+with the `hot_reload` flag, which `scripts/web_dev` passes:
+
+```console
+$ crystal run -Dhot_reload web_interface.cr
+```

@@ -4,4 +4,4 @@
 watchexec \
   --filter '*.ecr' \
   --filter '*.cr' \
-  -r crystal run web_interface.cr
+  -r crystal run -Dhot_reload web_interface.cr

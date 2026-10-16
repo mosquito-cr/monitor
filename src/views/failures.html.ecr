@@ -1,0 +1,39 @@
+<% content_for "header" do %>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/job.css" />
+<% end %>
+
+<% if failures.empty? %>
+  <p>No recent failures.</p>
+<% else %>
+  <table class="zebra-details">
+    <thead>
+      <tr>
+        <th>Failed At</th>
+        <th>Job</th>
+        <th>Queue</th>
+        <th>State</th>
+        <th>Retries</th>
+        <th>Error</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% failures.each do |failure| %>
+        <tr>
+          <td><%= failure.failed_at %></td>
+          <td><a href="/job_run/<%= HTML.escape failure.job_run.id %>"><%= HTML.escape failure.job_run.type %></a></td>
+          <td><%= HTML.escape failure.queue %></td>
+          <td><%= failure.state %></td>
+          <td><%= failure.job_run.retry_count %></td>
+          <td>
+            <% if error_class = failure.job_run.error_class %>
+              <code><%= HTML.escape error_class %></code>
+            <% end %>
+            <% if error_message = failure.job_run.error_message %>
+              <div class="error-message"><%= HTML.escape error_message %></div>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

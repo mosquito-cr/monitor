@@ -38,6 +38,32 @@
           <% end %>
         <% end %>
       </tr>
+      <tr>
+        <td>Retries</td>
+        <td><%= job.retry_count %></td>
+        <td></td>
+      </tr>
+      <% if failed_at = job.failed_at %>
+        <tr>
+          <td>Failed At</td>
+          <td><%= failed_at %></td>
+          <td></td>
+        </tr>
+      <% end %>
+      <% if error_class = job.error_class %>
+        <tr>
+          <td>Error</td>
+          <td><code><%= HTML.escape error_class %></code></td>
+          <td></td>
+        </tr>
+      <% end %>
+      <% if error_message = job.error_message %>
+        <tr>
+          <td>Error Message</td>
+          <td class="error-message"><%= HTML.escape error_message %></td>
+          <td></td>
+        </tr>
+      <% end %>
     </tbody>
   </table>
 

@@ -11,21 +11,12 @@
   <% {% end %} %>
 </head>
 <body>
-  <!--div id="queues" class="active">
-    <mosquito-queue-list></mosquito-queue-list>
-  </div>
-  <div id="messages">
-    <mosquito-message-stream></mosquito-message-stream>
-  </div-->
-
-
   <h1>Mosquito Dashboard (<%= Current.tab %>)</h1>
 
   <div id="tabs">
     <a href="/queues"  class="current-tab-<%= Current.tab == :queues %>">Queues</a>
     <a href="/overseers" class="current-tab-<%= Current.tab == :overseers %>">Overseers</a>
     <a href="/failures" class="current-tab-<%= Current.tab == :failures %>">Failures</a>
-    <a href="/messages"  class="current-tab-<%= Current.tab == :messages %>">Messages</a>
     <%= yield_content "extra_tabs" %>
   </div>
 

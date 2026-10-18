@@ -12,6 +12,7 @@ module Mosquito::InspectWeb
   end
 end
 
+require "./http/root"
 require "./http/overseers"
 require "./http/queues"
 require "./http/events"
